@@ -50,12 +50,8 @@ def sqlfunc(func):
     return wrapper
 
 
-@sqlfunc
+#@sqlfunc
 async def user_registration(ctx):
-    con = sqlpool.get_conn()
-    if not con.open:
-        con.ping(True)
-    cursor = con.cursor()
     user_info = dict(user_id=None, user_name=None, user_sex=None, search_sex=None, description=None)
     user_info['user_id'] = ctx.from_id
     await ctx.send('Для начала представься', keyboard=vk_botting.Keyboard.get_empty_keyboard())
@@ -91,12 +87,9 @@ async def user_registration(ctx):
     await show_my_form(ctx)
 
 
-@sqlfunc
+#@sqlfunc
 async def show_my_form(ctx):
-    con = sqlpool.get_conn()
-    if not con.open:
-        con.ping(True)
-    cursor = con.cursor()
+
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
     await ctx.send('Вот твоя анкета: \n' + str(user_form[0]['user_name']) + '\nЯ: ' + str(user_form[0]['user_sex']) +
@@ -112,7 +105,7 @@ async def show_my_form(ctx):
         await user_registration(ctx)
 
 
-@sqlfunc
+#@sqlfunc
 @bot.command(name='начать')
 async def begin(ctx):
     good_user = await bot.vk_request('groups.isMember', group_id=cred.muecyl_id, user_id=ctx.from_id)
@@ -120,10 +113,7 @@ async def begin(ctx):
     if good_user['response'] == 0:
         await ctx.send('Ты не муецилист')
     else:
-        con = sqlpool.get_conn()
-        if not con.open:
-            con.ping(True)
-        cursor = con.cursor()
+
         cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
         user_form = cursor.fetchall()
         if user_form == ():
@@ -131,4 +121,9 @@ async def begin(ctx):
         else:
             await show_my_form(ctx)
 
+
+con = sqlpool.get_conn()
+if not con.open:
+    con.ping(True)
+cursor = con.cursor()
 bot.run(cred.token)
