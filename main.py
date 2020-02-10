@@ -2,7 +2,6 @@ import credentials as cred
 import vk_botting
 from pymysqlpool.pool import Pool  # Для работы с сервером и БД
 import pymysql
-import asyncio
 bot = vk_botting.Bot(vk_botting.when_mentioned_or_pm(), case_insensitive=True)
 config = {'host': cred.host, 'user': cred.user, 'password': cred.password, 'db': cred.db, 'autocommit': True, 'charset': cred.charset, 'cursorclass': pymysql.cursors.DictCursor}
 try:
@@ -33,24 +32,6 @@ def search_sex_menu():
     return keyboard
 
 
-def sqlfunc(func):
-    def wrapper(*args, **kwargs):
-        global sqlpool
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(e)
-            try:
-                sqlpool = Pool(**config)
-                sqlpool.init()
-            except Exception as e:
-                print(e)
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-#@sqlfunc
 async def user_registration(ctx):
     user_info = dict(user_id=None, user_name=None, user_sex=None, search_sex=None, description=None)
     user_info['user_id'] = ctx.from_id
@@ -87,7 +68,6 @@ async def user_registration(ctx):
     await show_my_form(ctx)
 
 
-#@sqlfunc
 async def show_my_form(ctx):
 
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
@@ -105,7 +85,6 @@ async def show_my_form(ctx):
         await user_registration(ctx)
 
 
-#@sqlfunc
 @bot.command(name='начать')
 async def begin(ctx):
     good_user = await bot.vk_request('groups.isMember', group_id=cred.muecyl_id, user_id=ctx.from_id)
