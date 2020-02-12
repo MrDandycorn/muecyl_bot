@@ -37,6 +37,13 @@ def like_menu():
     return keyboard
 
 
+def answer_menu():
+    keyboard = vk_botting.Keyboard()
+    keyboard.add_button('Нрав', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_button('НаХ', vk_botting.KeyboardColor.PRIMARY)
+    return keyboard
+
+
 def your_sex_menu():
     keyboard = vk_botting.Keyboard()
     keyboard.add_button('Мужской', vk_botting.KeyboardColor.PRIMARY)
@@ -84,7 +91,7 @@ async def user_registration(ctx):
     users = cursor.fetchall()
     if users != ():
         cursor.execute(f'DELETE FROM users WHERE user_id=%s', [user_info['user_id']])
-    print(user_info)
+    #print(user_info)
     cursor.execute(f'INSERT INTO users (user_id, user_name, user_sex, search_sex, description, next_user) '
                            f'VALUES (%s, %s, %s, %s, %s, 0)',
                            [user_info['user_id'], user_info['user_name'], user_info['user_sex'],
@@ -168,9 +175,9 @@ async def search(ctx):
         cursor.execute(f'SELECT * FROM s%s', [ctx.from_id])
         suggested_users = cursor.fetchall()
         cursor.close()
-        print(suggested_users)
+        #print(suggested_users)
         cur_user = user_info['next_user']
-        print(cur_user)
+        #print(cur_user)
         cur_user = int(cur_user)
         for user in suggested_users:
             cur_user += 1
@@ -198,8 +205,15 @@ async def search(ctx):
                     cursor.execute(f'CREATE TABLE q%s (id BIGINT)', user_to_suggest['user_id'])
                 cursor.execute('SELECT * FROM q%s', user_to_suggest['user_id'])
                 queue = cursor.fetchall()
+                print(123445)
+                print(queue)
                 if queue == ():
-                    pass#избранный пользваатель еще не плучил не одного сообщения, очередь пустая, отправляем ему
+                    print(45960)
+                    print(user_info)
+                    await bot.send_message(
+                        peer_id=user_to_suggest['user_id'],
+                        message=(f'Тебя оценили\n %s \n %s' % (user_info['user_name'], user_info['description'])),
+                        keyboard=answer_menu())
                 cursor.execute(f'SELECT * FROM q%s WHERE id = %s', [user_to_suggest['user_id'], ctx.from_id])
                 if cursor.fetchall() == ():
                     cursor.execute(f'INSERT INTO q%s (id) VALUES (%s)', [user_to_suggest['user_id'], ctx.from_id])
@@ -211,9 +225,48 @@ async def search(ctx):
 
 @bot.command(name='стоп')
 async def restart(ctx):
+    #await ctx.send(' ', keyboard=mainmenu())
     await show_user_form(ctx)
+
+
+@bot.command(name='нрав')
+async def like(ctx):
+    cursor = con.cursor()
+    cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
+    user = cursor.fetchone()
+    print(user)
+    await ctx.send(f'Добавляйся, vk.com/id%s' % user['id'])
+    await bot.send_message(peer_id=user['id'], message=f'Добавляйся, vk.com/id%s' % ctx.from_id)
+    cursor.close()
+    await next_suggestion(ctx)
+
+
+@bot.command(name='нах')
+async def nah(ctx):
+    await next_suggestion(ctx)
+
+
+async def next_suggestion(ctx):
+    cursor = con.cursor()
+    cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
+    user = cursor.fetchone()
+    cursor.execute(f'DELETE FROM q%s WHERE id=%s', [ctx.from_id, user['id']])
+    cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
+    user = cursor.fetchone()
+    if user != ():
+        cursor.execute(f'SELECT * FROM users WHERE user_id=%s', [user['id']])
+        user_info = cursor.fetchone()
+        await bot.send_message(peer_id=ctx.from_id,
+                               message=(f'Тебя оценили\n %s \n %s' % (user_info['user_name'], user_info['description'])),
+                               keyboard=answer_menu())
+    else:
+        await ctx.send('Все заявки просмотрены')
+        await show_user_form(ctx)
+    cursor.close()
+
 con = sqlpool.get_conn()
 if not con.open:
     con.ping(True)
 
 bot.run(cred.token)
+
