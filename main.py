@@ -212,7 +212,7 @@ async def search(ctx):
                     print(user_info)
                     await bot.send_message(
                         peer_id=user_to_suggest['user_id'],
-                        message=(f'Тебя оценили\n %s \n %s' % (user_info['user_name'], user_info['description'])),
+                        message=('Тебя оценили\n {} \n {}'.format(user_info['user_name'], user_info['description'])),
                         keyboard=answer_menu())
                 cursor.execute(f'SELECT * FROM q%s WHERE id = %s', [user_to_suggest['user_id'], ctx.from_id])
                 if cursor.fetchall() == ():
@@ -235,8 +235,13 @@ async def like(ctx):
     cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
     user = cursor.fetchone()
     print(user)
-    await ctx.send(f'Добавляйся, vk.com/id%s' % user['id'])
-    await bot.send_message(peer_id=user['id'], message=f'Добавляйся, vk.com/id%s' % ctx.from_id)
+    if user is not None:
+        await ctx.send(f'Добавляйся, vk.com/id%s' % user['id'])
+        await bot.send_message(peer_id=user['id'], message='Добавляйся, vk.com/id{}'.format(ctx.from_id))
+    else:
+        await ctx.send('Все заявки просмотрены')
+        await show_user_form(ctx)
+        return
     cursor.close()
     await next_suggestion(ctx)
 
@@ -250,18 +255,24 @@ async def next_suggestion(ctx):
     cursor = con.cursor()
     cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
     user = cursor.fetchone()
-    cursor.execute(f'DELETE FROM q%s WHERE id=%s', [ctx.from_id, user['id']])
-    cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
-    user = cursor.fetchone()
-    if user != ():
-        cursor.execute(f'SELECT * FROM users WHERE user_id=%s', [user['id']])
-        user_info = cursor.fetchone()
-        await bot.send_message(peer_id=ctx.from_id,
-                               message=(f'Тебя оценили\n %s \n %s' % (user_info['user_name'], user_info['description'])),
-                               keyboard=answer_menu())
+    if user is not None:
+        cursor.execute(f'DELETE FROM q%s WHERE id=%s', [ctx.from_id, user['id']])
+        cursor.execute(f'SELECT * FROM q%s', [ctx.from_id])
+        user = cursor.fetchone()
+        print(user)
+        if user is not None:
+            cursor.execute(f'SELECT * FROM users WHERE user_id=%s', [user['id']])
+            user_info = cursor.fetchone()
+            await bot.send_message(peer_id=ctx.from_id,
+                                   message='Тебя оценили\n{}\n {}'.format(user_info['user_name'], user_info['description']),
+                                   keyboard=answer_menu())
+        else:
+            await ctx.send('Все заявки просмотрены')
+            await show_user_form(ctx)
     else:
         await ctx.send('Все заявки просмотрены')
         await show_user_form(ctx)
+        return
     cursor.close()
 
 con = sqlpool.get_conn()
