@@ -278,6 +278,9 @@ async def next_suggestion(ctx):
         cursor.close()
 
 
+@bot.command(name='инфо')
+async def info(ctx):
+    await ctx.send('v1.0.2 \n так же здесь будет инутрукция')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
