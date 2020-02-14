@@ -188,7 +188,7 @@ async def topcheg(ctx):
         suggestion = cursor.fetchone()
         print(suggestion['queue']) 
         print ('hi') 
-        if suggestion['queue'] is not None:
+        if suggestion['queue'] != '':
             queue = suggestion['queue'].split('s')
         else:
             queue = list()
