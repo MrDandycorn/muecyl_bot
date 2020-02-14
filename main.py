@@ -20,8 +20,11 @@ def sex_transform(sex):
     
 def mainmenu():
     keyboard = vk_botting.Keyboard()
-    keyboard.add_button('Заполнить заново', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('Искать', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_line()
+    keyboard.add_button('Заполнить заново', vk_botting.KeyboardColor.SECONDARY)
+    keyboard.add_line()
+    keyboard.add_button('Инфо', vk_botting.KeyboardColor.SECONDARY)
     return keyboard
 
 
@@ -29,12 +32,14 @@ def like_menu():
     keyboard = vk_botting.Keyboard()
     keyboard.add_button('Топчег', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('Нахуй', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_line()
+    keyboard.add_button('Стоп', vk_botting.KeyboardColor.SECONDARY)
     return keyboard
 
 
 def answer_menu():
     keyboard = vk_botting.Keyboard()
-    keyboard.add_button('Нрав', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_button('НраВ', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('НаХ', vk_botting.KeyboardColor.PRIMARY)
     return keyboard
 
@@ -306,5 +311,4 @@ if not con.open:
     con.ping(True)
 
 bot.run(cred.token)
-
 
