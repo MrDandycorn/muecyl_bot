@@ -190,6 +190,7 @@ async def topcheg(ctx):
             queue = suggestion['queue'].split('s')
         else:
             queue = list()
+        print(queue) 
         if len(queue) == 0:
             print('sendind...')
             await bot.send_message(peer_id=user['last_suggestion'], message='Тебя оценили\n{}\n{}'.format(user['user_name'], user['description']), keyboard=answer_menu())
@@ -280,7 +281,7 @@ async def next_suggestion(ctx):
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.2 \n так же здесь будет инутрукция')
+    await ctx.send('v1.0.3 \n так же здесь будет инутрукция')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
