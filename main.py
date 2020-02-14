@@ -186,6 +186,8 @@ async def topcheg(ctx):
         #рассматриваем два случая: пустая и непустая очередь у найденного юзера
         cursor.execute('SELECT * FROM users WHERE user_id = {}'.format(user['last_suggestion']))
         suggestion = cursor.fetchone()
+        print(suggestion['queue']) 
+
         if suggestion['queue'] is not None:
             queue = suggestion['queue'].split('s')
         else:
