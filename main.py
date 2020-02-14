@@ -101,14 +101,14 @@ async def show_user_form(ctx):
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
     cursor.close()
-    if user_form[0]['user_sex'] == 1:
-        us = 'м'
-    else:
-        us = 'ж'
-    if user_form[0]['user_sex'] == 1:
-        ss = 'м'
-    else:
-        ss = 'ж'
+#     if user_form[0]['user_sex'] == 1:
+#         us = 'м'
+#     else:
+#         us = 'ж'
+#     if user_form[0]['user_sex'] == 1:
+#         ss = 'м'
+#     else:
+#         ss = 'ж'
     await ctx.send('Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + us +
                    '\nИщу: ' + ss + '\n' + str(user_form[0]['description']),
                    keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
