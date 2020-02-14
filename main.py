@@ -290,6 +290,12 @@ async def next_suggestion(ctx):
         await ctx.send('Тебя оценили\n{}\n{}'.format(suggestion['user_name'], suggestion['description']), keyboard=answer_menu())
         cursor.close()
 
+        
+@bot.command(name='ахтунг')
+async def achtung(ctx):
+    await ctx.send('Поздравляем, вы сломали бота')
+
+
 
 @bot.command(name='инфо')
 async def info(ctx):
