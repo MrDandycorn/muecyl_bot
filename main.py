@@ -293,7 +293,7 @@ async def next_suggestion(ctx):
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.6 \n так же здесь будет инутрукция')
+    await ctx.send('v1.0.6 \n Инструкция: \n Если что-то пошло не так надо написать «Стоп» \n \n Если вы сломали бота пишите «АХТУНГ» \n \n Если что-то не получается, всегда помните, что у вас лапки \n\n Да прибудет с вами сила!! \n \n По вопросам работы бота, идеям ни ули прсото по приколу пишсаьб разработчику бота vk.com/kuzakuza')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
@@ -311,4 +311,3 @@ if not con.open:
     con.ping(True)
 
 bot.run(cred.token)
-
