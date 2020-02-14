@@ -17,7 +17,8 @@ def sex_transform(sex):
         return 'м'
     else:
         return 'ж'
-    
+
+
 def mainmenu():
     keyboard = vk_botting.Keyboard()
     keyboard.add_button('Искать', vk_botting.KeyboardColor.PRIMARY)
@@ -104,15 +105,6 @@ async def show_user_form(ctx):
     cursor = con.cursor()
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
-    cursor.close()
-#     if user_form[0]['user_sex'] == 1:
-#         us = 'м'
-#     else:
-#         us = 'ж'
-#     if user_form[0]['user_sex'] == 1:
-#         ss = 'м'
-#     else:
-#         ss = 'ж'
     await ctx.send('Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + sex_transform(user_form[0]['user_sex']) +
                    '\nИщу: ' + sex_transform(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
                    keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
@@ -296,6 +288,9 @@ async def achtung(ctx):
     await ctx.send('Поздравляем, вы сломали бота')
 
 
+@bot.listen()
+async def on_conversation_start(ctx):
+    await user_registration(ctx)
 
 @bot.command(name='инфо')
 async def info(ctx):
