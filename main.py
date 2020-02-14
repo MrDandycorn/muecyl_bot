@@ -23,7 +23,7 @@ except Exception as exc:
 #             return resp
 #     await pool.wait_closed()
 def sex_transformation(sex):
-    if sex == 1:'
+    if int(sex) == 1:'
         return 'м'
     else:
         return 'ж'
