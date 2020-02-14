@@ -3,8 +3,10 @@ import vk_botting
 from pymysqlpool.pool import Pool  # Для работы с сервером и БД
 import pymysql
 import datetime
+
 bot = vk_botting.Bot(vk_botting.when_mentioned_or_pm(), case_insensitive=True)
-config = {'host': cred.host, 'user': cred.user, 'password': cred.password, 'db': cred.db, 'autocommit': True, 'charset': cred.charset, 'cursorclass': pymysql.cursors.DictCursor}
+config = {'host': cred.host, 'user': cred.user, 'password': cred.password, 'db': cred.db, 'autocommit': True,
+          'charset': cred.charset, 'cursorclass': pymysql.cursors.DictCursor}
 try:
     sqlpool = Pool(**config)
     sqlpool.init()
@@ -12,21 +14,20 @@ except Exception as exc:
     print(exc)
 
 
-# async def abstract_request(query, values, response_needed=False):
-#     pool = await aiomysql.create_pool(**config)
-#     async with pool.acquire() as conn:
-#         async with conn.cursor() as cur:
-#             await cur.execute(query, values)
-#         if response_needed:
-#             resp = cur.fetchall()
-#             pool.close()
-#             return resp
-#     await pool.wait_closed()
+def sex_transform(sex):
+    if int(sex) == 1:
+        return 'м'
+    else:
+        return 'ж'
+
 
 def mainmenu():
     keyboard = vk_botting.Keyboard()
-    keyboard.add_button('Заполнить заново', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('Искать', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_line()
+    keyboard.add_button('Заполнить заново', vk_botting.KeyboardColor.SECONDARY)
+    keyboard.add_line()
+    keyboard.add_button('Инфо', vk_botting.KeyboardColor.SECONDARY)
     return keyboard
 
 
@@ -34,12 +35,14 @@ def like_menu():
     keyboard = vk_botting.Keyboard()
     keyboard.add_button('Топчег', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('Нахуй', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_line()
+    keyboard.add_button('Стоп', vk_botting.KeyboardColor.SECONDARY)
     return keyboard
 
 
 def answer_menu():
     keyboard = vk_botting.Keyboard()
-    keyboard.add_button('Нрав', vk_botting.KeyboardColor.PRIMARY)
+    keyboard.add_button('НраВ', vk_botting.KeyboardColor.PRIMARY)
     keyboard.add_button('НаХ', vk_botting.KeyboardColor.PRIMARY)
     return keyboard
 
@@ -91,11 +94,11 @@ async def user_registration(ctx):
     users = cursor.fetchall()
     if users != ():
         cursor.execute(f'DELETE FROM users WHERE user_id=%s', [user_info['user_id']])
-    #print(user_info)
+    # print(user_info)
     cursor.execute(f'INSERT INTO users (user_id, user_name, user_sex, search_sex, description) '
-                           f'VALUES (%s, %s, %s, %s, %s)',
-                           [user_info['user_id'], user_info['user_name'], user_info['user_sex'],
-                            user_info['search_sex'], user_info['description']])
+                   f'VALUES (%s, %s, %s, %s, %s)',
+                   [user_info['user_id'], user_info['user_name'], user_info['user_sex'],
+                    user_info['search_sex'], user_info['description']])
     cursor.close()
     await show_user_form(ctx)
 
@@ -105,9 +108,18 @@ async def show_user_form(ctx):
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
     cursor.close()
-    await ctx.send('Вот твоя анкета: \n' + str(user_form[0]['user_name']) + '\nЯ: ' + str(user_form[0]['user_sex']) +
-                   '\nИщу: ' + str(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
-                   keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
+    #     if user_form[0]['user_sex'] == 1:
+    #         us = 'м'
+    #     else:
+    #         us = 'ж'
+    #     if user_form[0]['user_sex'] == 1:
+    #         ss = 'м'
+    #     else:
+    #         ss = 'ж'
+    await ctx.send(
+        'Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + sex_transform(user_form[0]['user_sex']) +
+        '\nИщу: ' + sex_transform(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
+        keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
 
 
 @bot.command(name='заполнить заново', has_spaces=True)
@@ -140,7 +152,8 @@ async def suggest(ctx):
     cursor = con.cursor()
     cursor.execute('SELECT * FROM users WHERE user_id={}'.format(ctx.from_id))
     user = cursor.fetchone()
-    cursor.execute('SELECT * FROM users WHERE user_sex={} AND search_sex={}'.format(user['search_sex'], user['user_sex']))
+    cursor.execute(
+        'SELECT * FROM users WHERE user_sex={} AND search_sex={}'.format(user['search_sex'], user['user_sex']))
     possible_users = cursor.fetchall()
     if user['suggested_users'] is not None:
         already_suggested = user['suggested_users'].split('s')
@@ -148,12 +161,17 @@ async def suggest(ctx):
         already_suggested = list()
     done = False
     for possible_user in possible_users:
-        if str(possible_user['user_id']) not in already_suggested:
-            await ctx.send('Нашел для тебя:\n{}\n{}'.format(possible_user['user_name'], possible_user['description']), keyboard=like_menu())
+        print(str(possible_user['user_id']))
+        print(ctx.from_id)
+        if (str(possible_user['user_id']) not in already_suggested) and (str(possible_user['user_id']) != ctx.from_id):
+            await ctx.send('Нашел для тебя:\n{}\n{}'.format(possible_user['user_name'], possible_user['description']),
+                           keyboard=like_menu())
             already_suggested.append(str(possible_user['user_id']))
             already_suggested = 's'.join(already_suggested)
-            cursor.execute('UPDATE users SET suggested_users = \'{}\' WHERE user_id = {}'.format(already_suggested, ctx.from_id))
-            cursor.execute('UPDATE users SET last_suggestion = {} WHERE user_id = {}'.format(possible_user['user_id'], ctx.from_id))
+            cursor.execute(
+                'UPDATE users SET suggested_users = \'{}\' WHERE user_id = {}'.format(already_suggested, ctx.from_id))
+            cursor.execute('UPDATE users SET last_suggestion = {} WHERE user_id = {}'.format(possible_user['user_id'],
+                                                                                             ctx.from_id))
             done = True
             break
     if not done:
@@ -183,16 +201,21 @@ async def topcheg(ctx):
     if user['last_suggestion'] == -1:
         await ctx.send('Вероятно, тебе никого не предлагали, или предложение уже не актуально')
     else:
-        #рассматриваем два случая: пустая и непустая очередь у найденного юзера
+        # рассматриваем два случая: пустая и непустая очередь у найденного юзера
         cursor.execute('SELECT * FROM users WHERE user_id = {}'.format(user['last_suggestion']))
         suggestion = cursor.fetchone()
-        if suggestion['queue'] is not None:
+        print(suggestion['queue'])
+        print('hi')
+        if suggestion['queue'] != '':
             queue = suggestion['queue'].split('s')
         else:
             queue = list()
+        print(queue)
         if len(queue) == 0:
             print('sendind...')
-            await bot.send_message(peer_id=user['last_suggestion'], message='Тебя оценили\n{}\n{}'.format(user['user_name'], user['description']), keyboard=answer_menu())
+            await bot.send_message(peer_id=user['last_suggestion'],
+                                   message='Тебя оценили\n{}\n{}'.format(user['user_name'], user['description']),
+                                   keyboard=answer_menu())
         if str(ctx.from_id) not in queue:
             queue.append(str(user['user_id']))
             queue = 's'.join(queue)
@@ -211,7 +234,7 @@ async def restart(ctx):
     cursor = con.cursor()
     cursor.execute('SELECT * FROM users WHERE user_id={}'.format(ctx.from_id))
     user = cursor.fetchone()
-    if user['suggested_users']!='' and user['suggested_users'] is not None:
+    if user['suggested_users'] != '' and user['suggested_users'] is not None:
         suggested = user['suggested_users'].split('s')
         suggested.pop()
         suggested = 's'.join(suggested)
@@ -274,13 +297,22 @@ async def next_suggestion(ctx):
         print(queue)
         cursor.execute('SELECT * FROM users WHERE user_id={}'.format(queue[0]))
         suggestion = cursor.fetchone()
-        await ctx.send('Тебя оценили\n{}\n{}'.format(suggestion['user_name'], suggestion['description']), keyboard=answer_menu())
+        await ctx.send('Тебя оценили\n{}\n{}'.format(suggestion['user_name'], suggestion['description']),
+                       keyboard=answer_menu())
         cursor.close()
+
+
+@bot.command(name='ахтунг')
+async def achtung(ctx):
+    await ctx.send('Поздравляем, вы сломали бота')
 
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.2 \n так же здесь будет инутрукция')
+    await ctx.send(
+        'v1.0.6 \n Инструкция: \nБот не очень любит гомосексуалов(сам он педик) \nЕсли что-то пошло не так надо написать «Стоп» \n \nЕсли вы сломали бота пишите «АХТУНГ» \n \n Если что-то не получается, всегда помните, что у вас лапки \n\nДа прибудет с вами сила!! \n \nПо вопросам работы бота, идеям ни ули прсото по приколу писать разработчику бота vk.com/kuzakuza')
+
+
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
@@ -293,9 +325,13 @@ async def info(ctx):
 # async def on_ready():
 #     bot.loop.create_task(reset_suggestions())
 #
+@bot.listen()
+async def on_conversation_start(ctx):
+    await user_registration(ctx)
+
+
 con = sqlpool.get_conn()
 if not con.open:
     con.ping(True)
 
 bot.run(cred.token)
-
