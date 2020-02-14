@@ -12,12 +12,11 @@ except Exception as exc:
     print(exc)
 
 
-# def sex_transformation(sex):
-#     if int(sex) == 1:'
-#         return 'м'
-#     else:
-#         return 'ж'
-    
+def sex_transform(sex):
+    if int(sex) == 1:
+        return 'м'
+    else:
+        return 'ж'
     
 def mainmenu():
     keyboard = vk_botting.Keyboard()
@@ -109,8 +108,8 @@ async def show_user_form(ctx):
 #         ss = 'м'
 #     else:
 #         ss = 'ж'
-    await ctx.send('Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + us +
-                   '\nИщу: ' + ss + '\n' + str(user_form[0]['description']),
+    await ctx.send('Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + sex_transform(user_form[0]['user_sex']) +
+                   '\nИщу: ' + sex_transform(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
                    keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
 
 
@@ -307,4 +306,5 @@ if not con.open:
     con.ping(True)
 
 bot.run(cred.token)
+
 
