@@ -148,7 +148,7 @@ async def suggest(ctx):
         already_suggested = list()
     done = False
     for possible_user in possible_users:
-        if str(possible_user['user_id']) not in already_suggested:
+        if str(possible_user['user_id']) not in already_suggested and str(possible_user['user_id']) != ctx.from_id:
             await ctx.send('Нашел для тебя:\n{}\n{}'.format(possible_user['user_name'], possible_user['description']), keyboard=like_menu())
             already_suggested.append(str(possible_user['user_id']))
             already_suggested = 's'.join(already_suggested)
@@ -283,7 +283,7 @@ async def next_suggestion(ctx):
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.4 \n так же здесь будет инутрукция')
+    await ctx.send('v1.0.5 \n так же здесь будет инутрукция')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
