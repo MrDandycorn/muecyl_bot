@@ -22,7 +22,13 @@ except Exception as exc:
 #             pool.close()
 #             return resp
 #     await pool.wait_closed()
-
+def sex_transformation(sex):
+    if sex == 1:'
+        return 'м'
+    else:
+        return 'ж'
+    
+    
 def mainmenu():
     keyboard = vk_botting.Keyboard()
     keyboard.add_button('Заполнить заново', vk_botting.KeyboardColor.PRIMARY)
@@ -105,7 +111,7 @@ async def show_user_form(ctx):
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
     cursor.close()
-    await ctx.send('Вот твоя анкета: \n' + str(user_form[0]['user_name']) + '\nЯ: ' + str(user_form[0]['user_sex']) +
+    await ctx.send('Вот твоя анкета: \n' + sex_transformation(user_form[0]['user_name']) + '\nЯ: ' + sex_transformation(user_form[0]['user_sex']) +
                    '\nИщу: ' + str(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
                    keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
 
@@ -285,7 +291,7 @@ async def next_suggestion(ctx):
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.5 \n так же здесь будет инутрукция')
+    await ctx.send('v1.0.6 \n так же здесь будет инутрукция')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
