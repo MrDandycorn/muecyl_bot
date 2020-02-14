@@ -187,7 +187,7 @@ async def topcheg(ctx):
         cursor.execute('SELECT * FROM users WHERE user_id = {}'.format(user['last_suggestion']))
         suggestion = cursor.fetchone()
         print(suggestion['queue']) 
-
+        print ('hi') 
         if suggestion['queue'] is not None:
             queue = suggestion['queue'].split('s')
         else:
@@ -283,7 +283,7 @@ async def next_suggestion(ctx):
 
 @bot.command(name='инфо')
 async def info(ctx):
-    await ctx.send('v1.0.3 \n так же здесь будет инутрукция')
+    await ctx.send('v1.0.4 \n так же здесь будет инутрукция')
 # async def reset_suggestions():
 #     cursor = con.cursor()
 #     cursor.execute('UPDATE users SET suggested_users = \'\'')
