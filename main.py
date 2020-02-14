@@ -148,6 +148,8 @@ async def suggest(ctx):
         already_suggested = list()
     done = False
     for possible_user in possible_users:
+        print(str(possible_user['user_id'])) 
+        print(ctx.from_id)
         if str(possible_user['user_id']) not in already_suggested and str(possible_user['user_id']) != ctx.from_id:
             await ctx.send('Нашел для тебя:\n{}\n{}'.format(possible_user['user_name'], possible_user['description']), keyboard=like_menu())
             already_suggested.append(str(possible_user['user_id']))
