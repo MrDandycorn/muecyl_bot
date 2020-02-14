@@ -12,21 +12,11 @@ except Exception as exc:
     print(exc)
 
 
-# async def abstract_request(query, values, response_needed=False):
-#     pool = await aiomysql.create_pool(**config)
-#     async with pool.acquire() as conn:
-#         async with conn.cursor() as cur:
-#             await cur.execute(query, values)
-#         if response_needed:
-#             resp = cur.fetchall()
-#             pool.close()
-#             return resp
-#     await pool.wait_closed()
-def sex_transformation(sex):
-    if int(sex) == 1:'
-        return 'м'
-    else:
-        return 'ж'
+# def sex_transformation(sex):
+#     if int(sex) == 1:'
+#         return 'м'
+#     else:
+#         return 'ж'
     
     
 def mainmenu():
@@ -111,8 +101,16 @@ async def show_user_form(ctx):
     cursor.execute(f'SELECT * FROM users WHERE user_id =%s', [ctx.from_id])
     user_form = cursor.fetchall()
     cursor.close()
-    await ctx.send('Вот твоя анкета: \n' + sex_transformation(user_form[0]['user_name']) + '\nЯ: ' + sex_transformation(user_form[0]['user_sex']) +
-                   '\nИщу: ' + str(user_form[0]['search_sex']) + '\n' + str(user_form[0]['description']),
+    if user_form[0]['user_sex'] == 1:
+        us = 'м'
+    else:
+        us = 'ж'
+    if user_form[0]['user_sex'] == 1:
+        ss = 'м'
+    else:
+        ss = 'ж'
+    await ctx.send('Вот твоя анкета: \n' + user_form[0]['user_name'] + '\nЯ: ' + us +
+                   '\nИщу: ' + ss + '\n' + str(user_form[0]['description']),
                    keyboard=mainmenu())  # тут надо расписать красивую отправку сообщений
 
 
